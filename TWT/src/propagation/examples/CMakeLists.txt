@@ -15,3 +15,12 @@ set(libraries_to_link ${libcore} ${libpropagation} ${libbuildings})
 build_lib_example(
   "${name}" "${source_files}" "${header_files}" "${libraries_to_link}"
 )
+
+set(name matrix-propagation-sample)
+set(source_files ${name}.cc)
+set(header_files)
+set(libraries_to_link ${libcore} ${libpropagation} ${libconfig-store} ${libstats} ${libmobility} ${libbuildings} ${libwifi} ${libinternet} ${libnetwork} ${libapplications}
+)
+build_lib_example(
+  "${name}" "${source_files}" "${header_files}" "${libraries_to_link}"
+)
