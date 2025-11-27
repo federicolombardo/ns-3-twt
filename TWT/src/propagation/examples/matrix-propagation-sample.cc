@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
   phy.Set("RxNoiseFigure", DoubleValue(rxNoiseFigDb));
 
   WifiHelper wifi;
-  wifi.SetStandard(WIFI_STANDARD_80211ax_5GHZ); // Using 802.11ax
+  wifi.SetStandard(WIFI_STANDARD_80211ax_6GHZ); // Using 802.11ax
   wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
                                 "DataMode", StringValue("HtMcs7"),
                                 "ControlMode", StringValue("HtMcs0"));
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
   sinkApps.Stop(Seconds(10.0));
   sinkApps.Get(0)->TraceConnectWithoutContext("Rx", MakeCallback(&OnPacketRx));
 
-  // Transmitter configuration - sendinf UDP packets (1 per second)
+  // Transmitter configuration - sending UDP packets (1 per second)
   UdpClientHelper client(ifs.GetAddress(1), port);
   client.SetAttribute("MaxPackets", UintegerValue(100));
   client.SetAttribute("Interval",   TimeValue(Seconds(1.0)));
