@@ -1,0 +1,7 @@
+Test random number (if it does not change with the seed there is something wrong): 82
+t0 for STA 1 = 0.1
+msg="Error. t0 should be specified for all STAs in the simulation. STA with unset t0 generating the error: 2", file=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/scratch/twtUDP.cc, line=425
+libc++abi: terminating
+Finished executing the following commands:
+cd cmake_cache; cmake --build . -j 7 --target scratch_twtUDP ; cd ..
+cd .; export PATH=$PATH:/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib PYTHON_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/bindings/python LD_LIBRARY_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib ; /Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/scratch/ns3-dev-twtUDP-optimized --simId=1775568142 --nStations=5 --t0=0.1,0.1,0.1,0.1,0.1 --t1=0.1,0.1,0.1,0.1,0.1 --twtDuration=20,20,20,20,20 --packetPeriodicity=0.5,0.5,0.5,0.5,0.5 --enableTWT=true --mcs=4,4,4,4,4 --frequency=5 --twtTriggerBased=false --simulationTime=10240 --csv-output-file=Risultati/Run_2026-04-07_15-22-22_STA-5_TWT-20ms/risultato_raw

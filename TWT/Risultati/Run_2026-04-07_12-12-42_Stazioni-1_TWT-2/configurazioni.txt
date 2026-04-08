@@ -1,0 +1,10 @@
+=== SETUP SIMULAZIONE ===
+simId: 1775556762
+nStations: 1
+t0: 10
+t1: 10
+twtDuration: 2
+packetPeriodicity: 100
+mcs: 4
+frequency: 5
+simulationTime: 10000

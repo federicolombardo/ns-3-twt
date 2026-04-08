@@ -1,0 +1,42 @@
+Test random number (if it does not change with the seed there is something wrong): 82
+t0 for STA 1 = 0.1
+
+TWT agreement for STA:00:00:00:00:00:01
+Action frame acheduled at t = 2.9s;
+TWT SP starts at 0.1 ms after next beacon;
+TWT Wake Interval = 102.4 ms;
+TWT Nominal Wake Duration = 5 ms;
+
+
+/NodeList/0/DeviceList/*/Phy/State/State
+TX STA ID: 1
+Time packet sent to MAC: 3072.00 ms.
+RX STA ID: 1
+Rx time: 3073.03 ms | Latency: 1.03 ms | TX time: 3072.00 ms | TWT window start: 0.10 ms | Effective latency (latency-t1): 2048.93 ms.
+For STA 1;MacAddress=00:00:00:00:00:01; Elapsed time (ms) = 7168; Awake elapsed time (ms) = 383.18; Average current (mA) = 2.83794; Total energy consumed (J) = 0.0610271
+For STA: 1
+    SLEEP: 0.00244254 J (4.00238%)
+    SLEEP: 6784.82 ms (94.6543%)
+    TX: 0.00018096 J (0.296524%)
+    TX: 0.26 ms (0.00362723%)
+    RX: 0.00398297 J (6.52656%)
+    RX: 20.116 ms (0.280636%)
+    CCA_BUSY: 0.0001818 J (0.297901%)
+    CCA_BUSY: 1.212 ms (0.0169085%)
+    IDLE: 0.0542388 J (88.8766%)
+    IDLE: 361.592 ms (5.04453%)
+    totEnergyJoule: 0.0610271 J
+For STA: 2
+    RX: 3.0096e-05 J (0.00276869%)
+    RX: 0.152 ms (0.00212054%)
+    CCA_BUSY: 1.38e-05 J (0.00126953%)
+    CCA_BUSY: 0.092 ms (0.00128348%)
+    TX: 0.0150503 J (1.38455%)
+    TX: 21.624 ms (0.301674%)
+    IDLE: 1.07192 J (98.6114%)
+    IDLE: 7146.13 ms (99.6949%)
+    totEnergyJoule: 1.08701 J
+Terminated simulation [ID=1775567157] for freq=5 GHz, AP channel width=20 MHz, GI=800 ns, dlAckSeqType=ACK-SU-FORMAT, AP channel #=36, number of STAs=1, buffer/payload size for STA 1 [B]=700
+Finished executing the following commands:
+cd cmake_cache; cmake --build . -j 7 --target scratch_twtUDP ; cd ..
+cd .; export PATH=$PATH:/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib PYTHON_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/bindings/python LD_LIBRARY_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib ; /Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/scratch/ns3-dev-twtUDP-optimized --simId=1775567157 --nStations=1 --t0=0.1 --t1=0.1 --twtDuration=5 --packetPeriodicity=0.5 --enableTWT=true --mcs=4 --frequency=5 --twtTriggerBased=false --simulationTime=10240 --csv-output-file=Risultati/Run_2026-04-07_15-05-57_STA-1_TWT-5ms/risultato_raw

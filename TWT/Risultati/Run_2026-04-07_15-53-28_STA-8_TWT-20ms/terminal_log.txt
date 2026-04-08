@@ -1,0 +1,99 @@
+Test random number (if it does not change with the seed there is something wrong): 82
+t0 for STA 1 = 0.1
+t0 for STA 2 = 0.1
+t0 for STA 3 = 0.1
+t0 for STA 4 = 0.1
+t0 for STA 5 = 0.1
+t0 for STA 6 = 0.1
+t0 for STA 7 = 0.1
+t0 for STA 8 = 0.1
+
+TWT agreement for STA:00:00:00:00:00:01
+Action frame acheduled at t = 2.9s;
+TWT SP starts at 0.1 ms after next beacon;
+TWT Wake Interval = 102.4 ms;
+TWT Nominal Wake Duration = 20 ms;
+
+
+
+TWT agreement for STA:00:00:00:00:00:02
+Action frame acheduled at t = 2.9s;
+TWT SP starts at 0.1 ms after next beacon;
+TWT Wake Interval = 102.4 ms;
+TWT Nominal Wake Duration = 20 ms;
+
+
+
+TWT agreement for STA:00:00:00:00:00:03
+Action frame acheduled at t = 2.9s;
+TWT SP starts at 0.1 ms after next beacon;
+TWT Wake Interval = 102.4 ms;
+TWT Nominal Wake Duration = 20 ms;
+
+
+
+TWT agreement for STA:00:00:00:00:00:04
+Action frame acheduled at t = 2.9s;
+TWT SP starts at 0.1 ms after next beacon;
+TWT Wake Interval = 102.4 ms;
+TWT Nominal Wake Duration = 20 ms;
+
+
+
+TWT agreement for STA:00:00:00:00:00:05
+Action frame acheduled at t = 2.9s;
+TWT SP starts at 0.1 ms after next beacon;
+TWT Wake Interval = 102.4 ms;
+TWT Nominal Wake Duration = 20 ms;
+
+
+
+TWT agreement for STA:00:00:00:00:00:06
+Action frame acheduled at t = 2.9s;
+TWT SP starts at 0.1 ms after next beacon;
+TWT Wake Interval = 102.4 ms;
+TWT Nominal Wake Duration = 20 ms;
+
+
+
+TWT agreement for STA:00:00:00:00:00:07
+Action frame acheduled at t = 2.9s;
+TWT SP starts at 0.1 ms after next beacon;
+TWT Wake Interval = 102.4 ms;
+TWT Nominal Wake Duration = 20 ms;
+
+
+
+TWT agreement for STA:00:00:00:00:00:08
+Action frame acheduled at t = 2.9s;
+TWT SP starts at 0.1 ms after next beacon;
+TWT Wake Interval = 102.4 ms;
+TWT Nominal Wake Duration = 20 ms;
+
+
+/NodeList/0/DeviceList/*/Phy/State/State
+/NodeList/1/DeviceList/*/Phy/State/State
+/NodeList/2/DeviceList/*/Phy/State/State
+/NodeList/3/DeviceList/*/Phy/State/State
+/NodeList/4/DeviceList/*/Phy/State/State
+/NodeList/5/DeviceList/*/Phy/State/State
+/NodeList/6/DeviceList/*/Phy/State/State
+/NodeList/7/DeviceList/*/Phy/State/State
+TX STA ID: 1
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 2
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 3
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 4
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 5
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 6
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 7
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 8
+Finished executing the following commands:
+cd cmake_cache; cmake --build . -j 7 --target scratch_twtUDP ; cd ..
+cd .; export PATH=$PATH:/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib PYTHON_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/bindings/python LD_LIBRARY_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib ; /Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/scratch/ns3-dev-twtUDP-optimized --simId=1775570008 --nStations=8 --t0=0.1#0.1#0.1#0.1#0.1#0.1#0.1#0.1 --t1=0.1#0.1#0.1#0.1#0.1#0.1#0.1#0.1 --twtDuration=20#20#20#20#20#20#20#20 --packetPeriodicity=0.1#0.5#1.0#2.0#5.0 --enableTWT=true --mcs=4#4#4#4#4#4#4#4 --STAtype=3#3#3#3#3#3#3#3 --frequency=5 --twtTriggerBased=false --simulationTime=10240 --csv-output-file=Risultati/Run_2026-04-07_15-53-28_STA-8_TWT-20ms/risultato_raw

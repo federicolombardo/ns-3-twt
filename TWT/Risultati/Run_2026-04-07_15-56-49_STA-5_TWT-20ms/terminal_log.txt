@@ -1,0 +1,100 @@
+Test random number (if it does not change with the seed there is something wrong): 82
+t0 for STA 1 = 0.1
+t0 for STA 2 = 0.1
+t0 for STA 3 = 0.1
+t0 for STA 4 = 0.1
+t0 for STA 5 = 0.1
+/NodeList/0/DeviceList/*/Phy/State/State
+/NodeList/1/DeviceList/*/Phy/State/State
+/NodeList/2/DeviceList/*/Phy/State/State
+/NodeList/3/DeviceList/*/Phy/State/State
+/NodeList/4/DeviceList/*/Phy/State/State
+TX STA ID: 1
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 2
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 3
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 4
+Time packet sent to MAC: 3072.00 ms.
+TX STA ID: 5
+Time packet sent to MAC: 3072.00 ms.
+RX STA ID: 1
+Rx time: 3072.98 ms | Latency: 0.98 ms | TX time: 3072.00 ms | TWT window start: 0.10 ms | Effective latency (latency-t1): 2048.88 ms.
+RX STA ID: 2
+Rx time: 3074.52 ms | Latency: 2.52 ms | TX time: 3072.00 ms | TWT window start: 0.10 ms | Effective latency (latency-t1): 2050.42 ms.
+RX STA ID: 3
+Rx time: 3074.52 ms | Latency: 2.52 ms | TX time: 3072.00 ms | TWT window start: 0.10 ms | Effective latency (latency-t1): 2050.42 ms.
+RX STA ID: 4
+Rx time: 3075.46 ms | Latency: 3.46 ms | TX time: 3072.00 ms | TWT window start: 0.10 ms | Effective latency (latency-t1): 2051.36 ms.
+RX STA ID: 5
+Rx time: 3076.20 ms | Latency: 4.20 ms | TX time: 3072.00 ms | TWT window start: 0.10 ms | Effective latency (latency-t1): 2052.10 ms.
+For STA 1;MacAddress=00:00:00:00:00:01; Elapsed time (ms) = 7168; Awake elapsed time (ms) = 7168; Average current (mA) = 294.279; Total energy consumed (J) = 6.32818
+For STA 2;MacAddress=00:00:00:00:00:02; Elapsed time (ms) = 7168; Awake elapsed time (ms) = 7168; Average current (mA) = 294.285; Total energy consumed (J) = 6.3283
+For STA 3;MacAddress=00:00:00:00:00:03; Elapsed time (ms) = 7168; Awake elapsed time (ms) = 7168; Average current (mA) = 294.282; Total energy consumed (J) = 6.32823
+For STA 4;MacAddress=00:00:00:00:00:04; Elapsed time (ms) = 7168; Awake elapsed time (ms) = 7168; Average current (mA) = 294.28; Total energy consumed (J) = 6.3282
+For STA 5;MacAddress=00:00:00:00:00:05; Elapsed time (ms) = 7168; Awake elapsed time (ms) = 7168; Average current (mA) = 294.28; Total energy consumed (J) = 6.3282
+For STA: 1
+    TX: 0.000246549 J (0.00389605%)
+    TX: 0.148 ms (0.00206473%)
+    RX: 0.0242268 J (0.382841%)
+    RX: 20.792 ms (0.290067%)
+    CCA_BUSY: 0.00208152 J (0.0328929%)
+    CCA_BUSY: 2.36 ms (0.0329241%)
+    IDLE: 6.30163 J (99.5804%)
+    IDLE: 7144.7 ms (99.6749%)
+    totEnergyJoule: 6.32818 J
+For STA: 2
+    TX: 0.000379818 J (0.00600191%)
+    TX: 0.228 ms (0.0031808%)
+    RX: 0.0244459 J (0.386295%)
+    RX: 20.98 ms (0.29269%)
+    CCA_BUSY: 0.00184867 J (0.0292128%)
+    CCA_BUSY: 2.096 ms (0.0292411%)
+    IDLE: 6.30162 J (99.5785%)
+    IDLE: 7144.7 ms (99.6749%)
+    totEnergyJoule: 6.3283 J
+For STA: 3
+    TX: 0.000246549 J (0.00389601%)
+    TX: 0.148 ms (0.00206473%)
+    RX: 0.0244506 J (0.386372%)
+    RX: 20.984 ms (0.292746%)
+    CCA_BUSY: 0.00191218 J (0.0302166%)
+    CCA_BUSY: 2.168 ms (0.0302455%)
+    IDLE: 6.30163 J (99.5795%)
+    IDLE: 7144.7 ms (99.6749%)
+    totEnergyJoule: 6.32823 J
+For STA: 4
+    TX: 0.000246549 J (0.00389604%)
+    TX: 0.148 ms (0.00206473%)
+    RX: 0.0242921 J (0.383871%)
+    RX: 20.848 ms (0.290848%)
+    CCA_BUSY: 0.00203213 J (0.0321123%)
+    CCA_BUSY: 2.304 ms (0.0321429%)
+    IDLE: 6.30163 J (99.5801%)
+    IDLE: 7144.7 ms (99.6749%)
+    totEnergyJoule: 6.3282 J
+For STA: 5
+    TX: 0.000246549 J (0.00389604%)
+    TX: 0.148 ms (0.00206473%)
+    RX: 0.0242921 J (0.383871%)
+    RX: 20.848 ms (0.290848%)
+    CCA_BUSY: 0.00203213 J (0.0321123%)
+    CCA_BUSY: 2.304 ms (0.0321429%)
+    IDLE: 6.30163 J (99.5801%)
+    IDLE: 7144.7 ms (99.6749%)
+    totEnergyJoule: 6.3282 J
+For STA: 6
+    RX: 8.7912e-05 J (0.008082%)
+    RX: 0.444 ms (0.0061942%)
+    CCA_BUSY: 3.6e-05 J (0.00330958%)
+    CCA_BUSY: 0.24 ms (0.00334821%)
+    TX: 0.0159718 J (1.46833%)
+    TX: 22.948 ms (0.320145%)
+    IDLE: 1.07166 J (98.5203%)
+    IDLE: 7144.37 ms (99.6703%)
+    totEnergyJoule: 1.08775 J
+Terminated simulation [ID=1775570209] for freq=5 GHz, AP channel width=20 MHz, GI=800 ns, dlAckSeqType=ACK-SU-FORMAT, AP channel #=36, number of STAs=5, buffer/payload size for STA 1 [B]=700
+Finished executing the following commands:
+cd cmake_cache; cmake --build . -j 7 --target scratch_twtUDP ; cd ..
+cd .; export PATH=$PATH:/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib PYTHON_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/bindings/python LD_LIBRARY_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib ; /Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/scratch/ns3-dev-twtUDP-optimized --simId=1775570209 --nStations=5 --t0=0.1#0.1#0.1#0.1#0.1 --t1=0.1#0.1#0.1#0.1#0.1 --twtDuration=20#20#20#20#20 --packetPeriodicity=0.1#0.5#1.0#2.0#5.0 --enableTWT=false --mcs=4#4#4#4#4 --STAtype=3#3#3#3#3 --frequency=5 --twtTriggerBased=false --simulationTime=10240 --csv-output-file=Risultati/Run_2026-04-07_15-56-49_STA-5_TWT-20ms/risultato_raw

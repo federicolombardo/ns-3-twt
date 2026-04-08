@@ -1,0 +1,13 @@
+Timestamp: 2026-04-08_16-27-02
+ID: 1775658422
+nStations: 5
+t0: 0.1
+t1: 0.1
+twtDuration: [10, 10, 10, 10, 10]
+packetPeriodicity: [0.5, 1.0, 2.0, 2.0, 5.0]
+mcs: 4
+frequency: 5
+simulationTime: 10240
+enableTWT: false
+twtTriggerBased: true
+STAtype: 3

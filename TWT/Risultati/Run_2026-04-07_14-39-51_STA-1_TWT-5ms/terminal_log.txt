@@ -1,0 +1,6 @@
+Test random number (if it does not change with the seed there is something wrong): 82
+msg="Error. Invalid STA type. Supported STA types are 80211bgn (0), 80211bg (1), 80211ac (2) and 80211ax (3). STA causing the error: 1", file=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/scratch/twtUDP.cc, line=416
+libc++abi: terminating
+Finished executing the following commands:
+cd cmake_cache; cmake --build . -j 7 --target scratch_twtUDP ; cd ..
+cd .; export PATH=$PATH:/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib PYTHON_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/bindings/python LD_LIBRARY_PATH=/Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/lib ; /Users/federicolombardo/Documents/GitHub/ns-3-twt/TWT/build/scratch/ns3-dev-twtUDP-optimized --simId=1775565591 --nStations=1 --t0=0.1 --t1=0.1 --twtDuration=5 --packetPeriodicity=0.5 --enableTWT=true --mcs=4 --frequency=5 --twtTriggerBased=false --STAtype=80211ax --simulationTime=10240 --csv-output-file=Risultati/Run_2026-04-07_14-39-51_STA-1_TWT-5ms/risultato_raw
