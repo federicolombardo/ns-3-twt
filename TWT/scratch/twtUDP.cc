@@ -52,6 +52,9 @@
 //#include <execution>
 #include <chrono>
 #include <unistd.h>
+#include <fstream>
+#include <thread>
+
 
 #define FOLDER_PATH "scratch/"
 #define CLASS_IDX_VECTOR(x) (x-1)
@@ -315,6 +318,144 @@ typedef struct simulationParameters {
 
     std::string desired_duration_str;
 } sim_params_t;
+
+// ============================================================
+// BeaconSyncCallback - Fase 1: canale di comunicazione ns-3 ↔ Python
+// Viene chiamata ogni beacon interval durante la simulazione.
+// Scrive lo stato corrente su file JSON, aspetta la risposta
+// di Python, legge la nuova configurazione twtDuration.
+// ============================================================
+void BeaconSyncCallback(std::vector<ReportManager>* reportMans,
+                        int nStations,
+                        ns3::classParameter<double>* twtDuration,
+                        std::string beacon_file_base) {
+
+    double now_ms = Simulator::Now().GetMilliSeconds();
+
+    std::string state_file  = beacon_file_base + "_state.json";
+    std::string action_file = beacon_file_base + "_action.json";
+    std::string ack_file    = beacon_file_base + "_ack.json";
+    std::string done_file   = beacon_file_base + "_done.json";
+
+    // Rimuovi tutti i file residui dal beacon precedente
+    std::remove(state_file.c_str());
+    std::remove(action_file.c_str());
+    std::remove(ack_file.c_str());
+    std::remove(done_file.c_str());
+
+    // ── 1. Scrivi lo stato corrente ──────────────────────────────────
+    std::ofstream state_out(state_file);
+    if(!state_out.is_open()) {
+        std::cout << "[ns-3][ERRORE] Non riesco ad aprire: " << state_file << std::endl;
+        return;
+    }
+
+    state_out << "{\n";
+    state_out << "  \"sim_time_ms\": " << now_ms << ",\n";
+    state_out << "  \"nStations\": " << nStations << ",\n";
+    state_out << "  \"stations\": [\n";
+
+    for(int i = 1; i <= nStations; i++) {
+        ReportManager* rm = &((*reportMans)[i-1]);
+        state_out << "    {\n";
+        state_out << "      \"sta_id\": " << i << ",\n";
+        state_out << "      \"avg_lat_ms\": " << rm->getAverageLatency() << ",\n";
+        state_out << "      \"pktloss_perc\": " << rm->getPacketLossPercentage() << ",\n";
+        state_out << "      \"rx_bytes\": " << rm->getTotalBytesReceived() << ",\n";
+        state_out << "      \"twt_duration_ms\": " << twtDuration->getValue(i) << "\n";
+        state_out << "    }";
+        if(i < nStations) state_out << ",";
+        state_out << "\n";
+    }
+
+    state_out << "  ]\n";
+    state_out << "}\n";
+    state_out.close();
+
+    std::cout << "[ns-3] Beacon @" << now_ms << "ms - stato scritto, attendo Python..." << std::endl;
+
+    // ── 2. Aspetta che Python scriva il file action ──────────────────
+    int timeout_ms = 30000;
+    int waited_ms  = 0;
+    while(!std::ifstream(action_file).good() && waited_ms < timeout_ms) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        waited_ms += 50;
+    }
+
+    if(waited_ms >= timeout_ms) {
+        std::cout << "[ns-3][TIMEOUT] Python non ha risposto (action). Continuo." << std::endl;
+        std::remove(state_file.c_str());
+        return;
+    }
+
+    // Pausa breve per assicurarsi che Python abbia finito di scrivere
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+    // ── 3. Leggi la risposta di Python ──────────────────────────────
+    std::ifstream action_in(action_file);
+    std::string content((std::istreambuf_iterator<char>(action_in)),
+                         std::istreambuf_iterator<char>());
+    action_in.close();
+    std::remove(action_file.c_str());
+
+    // Parsing manuale del JSON: {"twt_durations": [5.0, 5.0, 5.0, 5.0, 5.0]}
+    std::vector<double> new_durations;
+    size_t arr_start = content.find('[');
+    size_t arr_end   = content.find(']');
+
+    if(arr_start != std::string::npos && arr_end != std::string::npos) {
+        std::string arr_content = content.substr(arr_start + 1, arr_end - arr_start - 1);
+        std::stringstream ss(arr_content);
+        std::string token;
+        while(std::getline(ss, token, ',')) {
+            token.erase(std::remove_if(token.begin(), token.end(), ::isspace), token.end());
+            if(!token.empty()) {
+                try {
+                    new_durations.push_back(std::stod(token));
+                } catch(...) {
+                    std::cout << "[ns-3][ERRORE] Parsing fallito per token: '" << token << "'" << std::endl;
+                }
+            }
+        }
+    }
+
+    // ── 4. Logga le nuove durate ─────────────────────────────────────
+    if((int)new_durations.size() == nStations) {
+        std::cout << "[ns-3] Nuove twtDuration: [";
+        for(int i = 0; i < nStations; i++) {
+            std::cout << new_durations[i];
+            if(i < nStations-1) std::cout << ", ";
+        }
+        std::cout << "] ms" << std::endl;
+    } else {
+        std::cout << "[ns-3][ERRORE] Numero durate errato (" << new_durations.size()
+                  << " invece di " << nStations << "). Ignoro." << std::endl;
+    }
+
+    // ── 5. Scrivi ACK per Python ─────────────────────────────────────
+    std::ofstream ack_out(ack_file);
+    ack_out << "{\"ack\": true, \"sim_time_ms\": " << now_ms << "}\n";
+    ack_out.close();
+
+    // ── 6. Aspetta che Python legga l'ACK e scriva done ─────────────
+    // Python deve cancellare l'ACK e scrivere done per segnalare
+    // che ha finito. Solo allora ns-3 può procedere al beacon successivo.
+    waited_ms = 0;
+    while(!std::ifstream(done_file).good() && waited_ms < timeout_ms) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        waited_ms += 50;
+    }
+
+    std::remove(ack_file.c_str());
+    std::remove(done_file.c_str());
+    std::remove(state_file.c_str());
+
+    if(waited_ms >= timeout_ms) {
+        std::cout << "[ns-3][TIMEOUT] Python non ha confermato (done). Continuo." << std::endl;
+    } else {
+        std::cout << "[ns-3] Beacon @" << now_ms << "ms completato correttamente." << std::endl;
+    }
+}
 
 static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_last_iter_rem_B_STA_ID_ptr,int *direct_ns3_mode_last_iter_rem_B_ptr) {
     uint64_t simulation_id = parameters.simulation_id;
@@ -950,7 +1091,35 @@ static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_l
 
     (void) APnodeID;
     //Simulator::Stop(Seconds(simulationTime + 1));
+
+    // ── Schedula BeaconSyncCallback ogni beacon interval ────────────
+    // Parte dopo CLIENT_TRAFFIC_START_SECOND + 1 beacon (quando il traffico è già avviato)
+    // e si ripete per tutta la durata della simulazione
+    {
+        double first_callback_ms = CLIENT_TRAFFIC_START_SECOND * 1000.0
+                                   + beaconInterval.GetMicroSeconds() / 1000.0;
+        double sim_end_ms        = simulationTime;
+
+        std::cout << "[ns-3] Schedulazione BeaconSyncCallback: primo beacon @"
+                  << first_callback_ms << "ms, ogni "
+                  << beaconInterval.GetMicroSeconds()/1000.0 << "ms, fine @"
+                  << sim_end_ms << "ms" << std::endl;
+
+        for(double t = first_callback_ms; t < sim_end_ms;
+            t += beaconInterval.GetMicroSeconds() / 1000.0) {
+            Simulator::Schedule(
+                MilliSeconds(t),
+                &BeaconSyncCallback,
+                &reportMans,
+                nStations,
+                &twtDuration,
+                csv_outfile + "_beacon"   // percorso base dei file IPC
+            );
+        }
+    }
+
     Simulator::Stop(MicroSeconds(simulationTime*1000.0));
+    
     Simulator::Run();
 
     // Uncomment this line to enable the additional collection of metrics through FlowMonitor (see: https://www.nsnam.org/docs/models/html/flow-monitor.html)

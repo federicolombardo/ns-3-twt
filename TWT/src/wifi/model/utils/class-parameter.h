@@ -123,7 +123,12 @@ namespace ns3
             key++;
         }
       }
-
+     
+     // Aggiorna il valore per una STA specifica, indipendentemente da se esiste già o no
+      // Usato dal MAB contestuale per aggiornare twtDuration mid-simulation
+      void setValue(unsigned int classnumber, T value) {
+        m_valuemap[classnumber] = value;
+      }
       size_t getSize(void) {return m_valuemap.size();}
 
       T getElementSum(void) {

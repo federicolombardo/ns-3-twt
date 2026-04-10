@@ -1,0 +1,811 @@
+{
+  "timestamp": "2026-04-08_18-53-20",
+  "n_steps": 15,
+  "n_arms": 5,
+  "arms": {
+    "0": [
+      10,
+      10,
+      10,
+      10,
+      10
+    ],
+    "1": [
+      8,
+      6,
+      4,
+      4,
+      2
+    ],
+    "2": [
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "3": [
+      12,
+      8,
+      5,
+      3,
+      1
+    ],
+    "4": [
+      6,
+      6,
+      6,
+      6,
+      6
+    ]
+  },
+  "epsilon_init": 0.8,
+  "epsilon_final": 0.1,
+  "arm_migliore": 0,
+  "stime_finali": {
+    "0": 0.382,
+    "1": 0.2608,
+    "2": 0.0,
+    "3": 0.1852,
+    "4": 0.0
+  },
+  "conteggi": {
+    "0": 10,
+    "1": 2,
+    "2": 0,
+    "3": 3,
+    "4": 0
+  },
+  "storia": [
+    {
+      "step": 1,
+      "arm_id": 0,
+      "tipo": "explore",
+      "epsilon": 0.8,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.0,
+        "2": 0.0,
+        "3": 0.0,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 1,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    },
+    {
+      "step": 2,
+      "arm_id": 1,
+      "tipo": "explore",
+      "epsilon": 0.75,
+      "twtDuration": [
+        8,
+        6,
+        4,
+        4,
+        2
+      ],
+      "obs": [
+        0.6316004395484924,
+        0.9005625247955322,
+        0.0
+      ],
+      "reward": 0.2608,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.0,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 1,
+        "1": 1,
+        "2": 0,
+        "3": 0,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 94.95035291627998,
+        "idle_time_perc": 4.29810259638,
+        "rx_time_perc": 0.37121788718,
+        "tx_time_perc": 0.27434676344000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 42.900450054820006,
+        "idle_energy_perc": 44.21203124558,
+        "rx_energy_perc": 5.5738445406,
+        "tx_energy_perc": 6.114704693959999,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 22.5140632,
+        "avg_effective_lat_ms": 22.5140632,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.57899619392
+      }
+    },
+    {
+      "step": 3,
+      "arm_id": 3,
+      "tipo": "explore",
+      "epsilon": 0.7,
+      "twtDuration": [
+        12,
+        8,
+        5,
+        3,
+        1
+      ],
+      "obs": [
+        0.6912692785263062,
+        1.0,
+        0.0
+      ],
+      "reward": 0.1852,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 1,
+        "1": 1,
+        "2": 0,
+        "3": 1,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 93.71779568233998,
+        "idle_time_perc": 5.536102081699999,
+        "rx_time_perc": 0.36994400776,
+        "tx_time_perc": 0.2708626453,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 39.635443765960005,
+        "idle_energy_perc": 48.388851046940005,
+        "rx_energy_perc": 5.16316801738,
+        "tx_energy_perc": 5.706947511539999,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 62.8094632,
+        "avg_effective_lat_ms": 62.8094632,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.65348145076
+      }
+    },
+    {
+      "step": 4,
+      "arm_id": 0,
+      "tipo": "exploit",
+      "epsilon": 0.65,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 2,
+        "1": 1,
+        "2": 0,
+        "3": 1,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    },
+    {
+      "step": 5,
+      "arm_id": 0,
+      "tipo": "exploit",
+      "epsilon": 0.6,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 3,
+        "1": 1,
+        "2": 0,
+        "3": 1,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    },
+    {
+      "step": 6,
+      "arm_id": 0,
+      "tipo": "exploit",
+      "epsilon": 0.55,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 4,
+        "1": 1,
+        "2": 0,
+        "3": 1,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    },
+    {
+      "step": 7,
+      "arm_id": 0,
+      "tipo": "exploit",
+      "epsilon": 0.5,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 5,
+        "1": 1,
+        "2": 0,
+        "3": 1,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    },
+    {
+      "step": 8,
+      "arm_id": 3,
+      "tipo": "explore",
+      "epsilon": 0.45,
+      "twtDuration": [
+        12,
+        8,
+        5,
+        3,
+        1
+      ],
+      "obs": [
+        0.6912692785263062,
+        1.0,
+        0.0
+      ],
+      "reward": 0.1852,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 5,
+        "1": 1,
+        "2": 0,
+        "3": 2,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 93.71779568233998,
+        "idle_time_perc": 5.536102081699999,
+        "rx_time_perc": 0.36994400776,
+        "tx_time_perc": 0.2708626453,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 39.635443765960005,
+        "idle_energy_perc": 48.388851046940005,
+        "rx_energy_perc": 5.16316801738,
+        "tx_energy_perc": 5.706947511539999,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 62.8094632,
+        "avg_effective_lat_ms": 62.8094632,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.65348145076
+      }
+    },
+    {
+      "step": 9,
+      "arm_id": 0,
+      "tipo": "exploit",
+      "epsilon": 0.4,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 6,
+        "1": 1,
+        "2": 0,
+        "3": 2,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    },
+    {
+      "step": 10,
+      "arm_id": 0,
+      "tipo": "exploit",
+      "epsilon": 0.35,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 7,
+        "1": 1,
+        "2": 0,
+        "3": 2,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    },
+    {
+      "step": 11,
+      "arm_id": 1,
+      "tipo": "explore",
+      "epsilon": 0.3,
+      "twtDuration": [
+        8,
+        6,
+        4,
+        4,
+        2
+      ],
+      "obs": [
+        0.6316004395484924,
+        0.9005625247955322,
+        0.0
+      ],
+      "reward": 0.2608,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 7,
+        "1": 2,
+        "2": 0,
+        "3": 2,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 94.95035291627998,
+        "idle_time_perc": 4.29810259638,
+        "rx_time_perc": 0.37121788718,
+        "tx_time_perc": 0.27434676344000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 42.900450054820006,
+        "idle_energy_perc": 44.21203124558,
+        "rx_energy_perc": 5.5738445406,
+        "tx_energy_perc": 6.114704693959999,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 22.5140632,
+        "avg_effective_lat_ms": 22.5140632,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.57899619392
+      }
+    },
+    {
+      "step": 12,
+      "arm_id": 0,
+      "tipo": "exploit",
+      "epsilon": 0.25,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 8,
+        "1": 2,
+        "2": 0,
+        "3": 2,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    },
+    {
+      "step": 13,
+      "arm_id": 3,
+      "tipo": "explore",
+      "epsilon": 0.2,
+      "twtDuration": [
+        12,
+        8,
+        5,
+        3,
+        1
+      ],
+      "obs": [
+        0.6912692785263062,
+        1.0,
+        0.0
+      ],
+      "reward": 0.1852,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 8,
+        "1": 2,
+        "2": 0,
+        "3": 3,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 93.71779568233998,
+        "idle_time_perc": 5.536102081699999,
+        "rx_time_perc": 0.36994400776,
+        "tx_time_perc": 0.2708626453,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 39.635443765960005,
+        "idle_energy_perc": 48.388851046940005,
+        "rx_energy_perc": 5.16316801738,
+        "tx_energy_perc": 5.706947511539999,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 62.8094632,
+        "avg_effective_lat_ms": 62.8094632,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.65348145076
+      }
+    },
+    {
+      "step": 14,
+      "arm_id": 0,
+      "tipo": "exploit",
+      "epsilon": 0.15,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 9,
+        "1": 2,
+        "2": 0,
+        "3": 3,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    },
+    {
+      "step": 15,
+      "arm_id": 0,
+      "tipo": "exploit",
+      "epsilon": 0.1,
+      "twtDuration": [
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "obs": [
+        0.9578430652618408,
+        0.10823452472686768,
+        0.0
+      ],
+      "reward": 0.382,
+      "stime_reward": {
+        "0": 0.382,
+        "1": 0.2608,
+        "2": 0.0,
+        "3": 0.1852,
+        "4": 0.0
+      },
+      "conteggi": {
+        "0": 10,
+        "1": 2,
+        "2": 0,
+        "3": 3,
+        "4": 0
+      },
+      "metriche_aggregate": {
+        "sleep_time_perc": 89.74770990136,
+        "idle_time_perc": 9.497161813760002,
+        "rx_time_perc": 0.37203901886,
+        "tx_time_perc": 0.27466167810000003,
+        "cca_time_perc": 0.0,
+        "sleep_energy_perc": 25.064226860499996,
+        "idle_energy_perc": 67.04901322138001,
+        "rx_energy_perc": 3.4699157821800006,
+        "tx_energy_perc": 3.65135620176,
+        "cca_energy_perc": 0.0,
+        "avg_lat_ms": 2.7058632000000005,
+        "avg_effective_lat_ms": 2.7058632000000005,
+        "throughput_Mbps": 5.46895e-07,
+        "pktloss_perc": 0.0,
+        "total_energy_J": 0.8946799004599999
+      }
+    }
+  ]
+}
