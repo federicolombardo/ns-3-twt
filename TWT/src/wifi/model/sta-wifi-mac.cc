@@ -110,6 +110,10 @@ StaWifiMac::StaWifiMac ()
     m_probeRequestEvent (),
     m_assocRequestEvent (),
     m_nextExpectedBeaconGenerationEvent (),
+
+    m_lastBeaconReceivedTime (Seconds(0)),
+    m_knownBeaconInterval (MicroSeconds(102400)),  // default, verrà aggiornato al primo beacon
+  
     m_beaconWakeUpPsEvent (),
     m_apsdEospRxTimeoutEvent (),  // TODO remove apsd
     m_beaconWatchdogEnd (Seconds (0)),
@@ -513,12 +517,37 @@ Time
 StaWifiMac::GetExpectedRemainingTimeTillNextBeacon(void) const
 {
   NS_LOG_FUNCTION (this);
-  // check if m_nextExpectedBeaconGenerationEvent is running. If not, throw error
-  if (!m_nextExpectedBeaconGenerationEvent.IsRunning ())
+  
+  // Caso normale: l'evento è schedulato, restituisci il tempo residuo
+  if (m_nextExpectedBeaconGenerationEvent.IsRunning ())
   {
-    NS_ABORT_MSG ("m_nextExpectedBeaconGenerationEvent is not running. Cannot get remaining time till next beacon. Check if last beacon was received at STA");
+    return Simulator::GetDelayLeft (m_nextExpectedBeaconGenerationEvent);
   }
-  return Simulator::GetDelayLeft (m_nextExpectedBeaconGenerationEvent);
+  
+  // Caso TWT: la STA sta dormendo e ha perso uno o più beacon, oppure
+  // l'evento non è stato ripianificato. Ricostruiamo matematicamente
+  // il tempo al prossimo beacon dall'ultimo timestamp conosciuto.
+  // Questo è sempre corretto perché i beacon sono periodici.
+  if (m_lastBeaconReceivedTime > Seconds(0) && m_knownBeaconInterval > Seconds(0))
+  {
+    Time now = Simulator::Now();
+    Time elapsed = now - m_lastBeaconReceivedTime;
+    // Numero di beacon interval trascorsi dall'ultimo beacon ricevuto
+    int64_t intervalsPassed = elapsed.GetMicroSeconds() / m_knownBeaconInterval.GetMicroSeconds();
+    // Prossimo beacon = ultimo beacon + (intervalsPassed + 1) * beacon interval
+    Time nextBeaconAbsoluteTime = m_lastBeaconReceivedTime 
+                                  + MicroSeconds((intervalsPassed + 1) * m_knownBeaconInterval.GetMicroSeconds());
+    Time remaining = nextBeaconAbsoluteTime - now;
+    NS_LOG_DEBUG ("Beacon event not running, computed fallback: " 
+                  << remaining.GetMicroSeconds() << " us (intervals passed since last beacon: " 
+                  << intervalsPassed << ")");
+    return remaining;
+  }
+  
+  // Fallback estremo: prima di ricevere qualsiasi beacon (non dovrebbe succedere
+  // perché la rinegoziazione TWT avviene dopo l'associazione)
+  NS_LOG_WARN ("No beacon ever received, returning default beacon interval");
+  return MicroSeconds(102400);
 }
 
 void
@@ -1396,6 +1425,12 @@ StaWifiMac::Receive (Ptr<WifiMacQueueItem> mpdu)
         {
           NS_LOG_DEBUG ("Received good beacon while associated");
           m_beaconArrival (Simulator::Now ());
+
+          // --- FIX TWT: salva timestamp e interval per fallback quando STA dorme ---
+          m_lastBeaconReceivedTime = Simulator::Now();
+          m_knownBeaconInterval = MicroSeconds (beacon.GetBeaconIntervalUs ());
+          // --- FINE FIX ---
+
           Time delay = MicroSeconds (beacon.GetBeaconIntervalUs () * m_maxMissedBeacons);
           Time beaconTimeStamp = MicroSeconds (beacon.GetTimestamp());
           // Setting m_expectedRemainingTimeTillNextBeacon

@@ -276,6 +276,12 @@ UdpMeasurementClient::SendSingle()
             m_reportman->set_last_wait_time_slots(m_slot_wait_counter);
         }
         ++m_sent;
+        if (m_count == 0 || m_sent < m_count) {
+            m_sendSingleEvent = Simulator::Schedule(
+                m_interval,
+                &UdpMeasurementClient::SendSingle,
+                this);
+        }
         m_totalTx += single_packet->GetSize();
         m_slot_wait_counter = 0; // Reset the counter couting how many slots we have been waiting before being able to transmit the packet
     }

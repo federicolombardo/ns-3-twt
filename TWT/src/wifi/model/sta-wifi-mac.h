@@ -552,6 +552,9 @@ private:
   EventId m_beaconWatchdog;    ///< beacon watchdog
   EventId m_nextExpectedBeaconGenerationEvent; ///< next expected beacon generation at AP - used for setting TWT schedules using next beacon as the reference
   
+  Time m_lastBeaconReceivedTime;  ///< Timestamp dell'ultimo beacon ricevuto
+  Time m_knownBeaconInterval;     ///< Beacon interval noto dall'ultimo beacon
+
   EventId m_beaconWakeUpPsEvent;    ///< Event for beacon wake up in PSM
   EventId m_twtSpEndRoutineEvent;    ///< Event for end of twt sp routine - designed only for one TWT agreement per STA
   

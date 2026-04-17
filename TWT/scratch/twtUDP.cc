@@ -127,6 +127,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, double>>TI_curre
         {"80211ax" , {{"IDLE", 294}, {"CCA_BUSY", 294}, {"RX", 388.4}, {"TX", 555.29}, {"SLEEP", 11.63}}} //QCA1062 Dual Band 2 × 2 MIMO 802.11ax + Bluetooth 5.1 - 11ax_HE40_MCS11
 };
 double *timeElapsedForSta_ns_TI, *awakeTimeElapsedForSta_ns_TI, *current_mA_TimesTime_ns_ForSta_TI; // This is only after keepTrackOfEnergyFrom_S
+double *snap_energy_mA_ns_ForSta;  // snapshot energia al beacon precedente
 
 struct ampereTimeState{
     double ampereTime;
@@ -325,12 +326,29 @@ typedef struct simulationParameters {
 // Scrive lo stato corrente su file JSON, aspetta la risposta
 // di Python, legge la nuova configurazione twtDuration.
 // ============================================================
+
+// Struct per raggruppare le durate TWT in modo da rispettare il limite
+// di 6 argomenti di Simulator::Schedule in questa versione di ns-3.
+struct TwtDurationState {
+    ns3::classParameter<double>* active;    // durata attualmente attiva sull'aria
+    ns3::classParameter<double>* pending;   // durata pianificata (non ancora attiva)
+};
+
 void BeaconSyncCallback(std::vector<ReportManager>* reportMans,
                         int nStations,
-                        ns3::classParameter<double>* twtDuration,
-                        std::string beacon_file_base) {
+                        TwtDurationState* twtState,
+                        std::string beacon_file_base,
+                        Ptr<ApWifiMac> apMac,
+                        std::vector<Mac48Address> staMacAddresses) {
 
     double now_ms = Simulator::Now().GetMilliSeconds();
+
+     // ── NUOVO: snapshot prima di leggere/scrivere le metriche ───────
+    for(int i = 0; i < nStations; i++) {
+        (*reportMans)[i].snapshotBeaconStart();
+    }
+    // ────────────────────────────────────────────────────────────────
+
 
     std::string state_file  = beacon_file_base + "_state.json";
     std::string action_file = beacon_file_base + "_action.json";
@@ -355,17 +373,47 @@ void BeaconSyncCallback(std::vector<ReportManager>* reportMans,
     state_out << "  \"nStations\": " << nStations << ",\n";
     state_out << "  \"stations\": [\n";
 
+
     for(int i = 1; i <= nStations; i++) {
         ReportManager* rm = &((*reportMans)[i-1]);
+
+        // Calcolo energia per-beacon
+        int idx = i - 1;
+        double delta_mA_ns = current_mA_TimesTime_ns_ForSta_TI[idx]
+                             - snap_energy_mA_ns_ForSta[idx];
+        double beacon_energy_J = (delta_mA_ns / 1000.0 / 1e9) * 3.0; // 3V
+        double beacon_avg_current_mA = 0.0;
+        if(timeElapsedForSta_ns_TI[idx] > 0) {
+            beacon_avg_current_mA = delta_mA_ns /
+                (timeElapsedForSta_ns_TI[idx] - snap_energy_mA_ns_ForSta[idx] + 1e-9);
+        }
+
+        // Aggiorna snapshot per il prossimo beacon
+        snap_energy_mA_ns_ForSta[idx] = current_mA_TimesTime_ns_ForSta_TI[idx];
+
         state_out << "    {\n";
-        state_out << "      \"sta_id\": " << i << ",\n";
-        state_out << "      \"avg_lat_ms\": " << rm->getAverageLatency() << ",\n";
-        state_out << "      \"pktloss_perc\": " << rm->getPacketLossPercentage() << ",\n";
-        state_out << "      \"rx_bytes\": " << rm->getTotalBytesReceived() << ",\n";
-        state_out << "      \"twt_duration_ms\": " << twtDuration->getValue(i) << "\n";
+        state_out << "      \"sta_id\": "            << i                            << ",\n";
+        state_out << "      \"avg_lat_ms\": "        << rm->getBeaconAvgLatency()    << ",\n";
+        state_out << "      \"pktloss_perc\": "      << rm->getBeaconPktLoss()       << ",\n";
+        state_out << "      \"rx_count\": "          << rm->getBeaconRxCount()       << ",\n";
+        state_out << "      \"tx_count\": "          << rm->getBeaconTxCount()       << ",\n";
+        state_out << "      \"cum_avg_lat_ms\": "    << rm->getAverageLatency()      << ",\n";
+        state_out << "      \"cum_rx_count\": "      << rm->getTotalReceivedPackets()<< ",\n";
+        state_out << "      \"beacon_energy_J\": "   << beacon_energy_J              << ",\n";
+        state_out << "      \"twt_duration_ms\": "   << twtState->active->getValue(i)     << "\n";
         state_out << "    }";
         if(i < nStations) state_out << ",";
         state_out << "\n";
+    }
+
+        // DEBUG TEMPORANEO - rimuovi dopo
+    for(int i = 0; i < nStations; i++) {
+        ReportManager* rm = &((*reportMans)[i]);
+        std::cout << "[DEBUG] STA" << (i+1)
+                << " cumulative: tx=" << rm->getTotalSentPackets()
+                << " rx=" << rm->getTotalReceivedPackets()
+                << " avg_lat=" << rm->getAverageLatency()
+                << std::endl;
     }
 
     state_out << "  ]\n";
@@ -419,7 +467,7 @@ void BeaconSyncCallback(std::vector<ReportManager>* reportMans,
         }
     }
 
-    // ── 4. Logga le nuove durate ─────────────────────────────────────
+    // ── 4. Applica le nuove durate e rinegozia TWT ───────────────────
     if((int)new_durations.size() == nStations) {
         std::cout << "[ns-3] Nuove twtDuration: [";
         for(int i = 0; i < nStations; i++) {
@@ -427,6 +475,68 @@ void BeaconSyncCallback(std::vector<ReportManager>* reportMans,
             if(i < nStations-1) std::cout << ", ";
         }
         std::cout << "] ms" << std::endl;
+        /*
+        for(int i = 0; i < nStations; i++) {
+            double old_dur = twtDuration->getValue(i+1);
+            double new_dur = new_durations[i];
+
+            twtDuration->setValue(i+1, new_dur);
+
+            if(std::abs(new_dur - old_dur) > 0.01) {
+                std::cout << "[ns-3] STA" << (i+1)
+                          << ": rinegoziazione TWT schedulata "
+                          << old_dur << "ms -> " << new_dur << "ms" << std::endl;
+
+                Time newDuration     = MilliSeconds(new_dur);
+                Time twtWakeInterval = beaconInterval;
+                Time time_t1         = MicroSeconds(100);
+
+                Simulator::Schedule(
+                    beaconInterval * 2 + MicroSeconds(200),
+                    &initiateTwtAtAp,
+                    apMac,
+                    staMacAddresses[i],
+                    twtWakeInterval,
+                    newDuration,
+                    time_t1);
+            }
+        } TOLTA E SOSTITUITA CON :*/
+        for(int i = 0; i < nStations; i++) {
+            double active_dur  = twtState->active->getValue(i+1);
+            double pending_dur = twtState->pending->getValue(i+1);
+            double new_dur     = new_durations[i];
+
+            bool same_as_active  = std::abs(new_dur - active_dur)  < 0.01;
+            bool same_as_pending = std::abs(new_dur - pending_dur) < 0.01;
+
+            if(same_as_active || same_as_pending) {
+                continue;
+            }
+
+            std::cout << "[ns-3] STA" << (i+1)
+                    << ": rinegoziazione TWT schedulata "
+                    << active_dur << "ms (attiva) / " << pending_dur
+                    << "ms (pianificata) -> " << new_dur << "ms" << std::endl;
+
+            twtState->pending->setValue(i+1, new_dur);
+
+            Time newDuration     = MilliSeconds(new_dur);
+            Time twtWakeInterval = beaconInterval;
+            Time time_t1         = MicroSeconds(100);
+
+            // Catturiamo il puntatore active dentro la lambda per aggiornarlo
+            // quando l'agreement diventa effettivamente attivo.
+            auto active_ptr = twtState->active;
+
+            Simulator::Schedule(
+                beaconInterval * 2 + MicroSeconds(200),
+                [apMac, mac = staMacAddresses[i], twtWakeInterval, newDuration, time_t1,
+                active_ptr, idx = i+1, new_dur]() {
+                    initiateTwtAtAp(apMac, mac, twtWakeInterval, newDuration, time_t1);
+                    active_ptr->setValue(idx, new_dur);
+                });
+}
+
     } else {
         std::cout << "[ns-3][ERRORE] Numero durate errato (" << new_durations.size()
                   << " invece di " << nStations << "). Ignoro." << std::endl;
@@ -503,6 +613,7 @@ static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_l
     ns3::classParameter<unsigned int> trafficType(0, nStations); // Default traffic type: 0 = DL
     ns3::classParameter<double> t0(-1, nStations);
     ns3::classParameter<double> t1(-1, nStations);
+    ns3::classParameter<double> twtDurationPending(1.024, nStations); // This is the "pending" TWT duration: when the controller decides to change the TWT duration, it updates this parameter immediately. The "active" TWT duration (twtDuration) will be updated only when the new agreement becomes effective on the air.
     ns3::classParameter<double> twtDuration(1.024, nStations);
     ns3::classParameter<double> deadlines(0.0, nStations);
     ns3::classParameter<int> STAtype(0, nStations);
@@ -536,6 +647,9 @@ static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_l
     if (twtDuration_str != "") {
         twtDuration.fillFromStringSequential(twtDuration_str);
     }
+    if (twtDuration_str != "") {
+    twtDurationPending.fillFromStringSequential(twtDuration_str);
+    }
     if (STAtype_str != "") {
         STAtype.fillFromStringSequential(STAtype_str);
     }
@@ -557,6 +671,12 @@ static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_l
             NS_FATAL_ERROR("Error. Invalid STA type. Supported STA types are 80211bgn (0), 80211bg (1), 80211ac (2) and 80211ax (3). STA causing the error: " << i);
         }
     }
+
+     // L'AP ha NodeId = nStations. Gli assegno lo stesso tipo della prima STA
+    // per evitare accessi a chiavi inesistenti in PhyStateTrace_inPlace.
+    // Nota: questo non influenza le metriche delle STA, serve solo a dare
+    // un modello di corrente valido al tracing dell'AP.
+    staIdToSTAtype[nStations] = STAtype.getValue(1);
 
     // Check the consistency of the t0 and t1 parameters
     for (int i = 1; i <= nStations; i++) {
@@ -632,14 +752,22 @@ static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_l
 
 
     // Energy model init
-    timeElapsedForSta_ns_TI = new double[nStations];
-    awakeTimeElapsedForSta_ns_TI = new double[nStations];
-    current_mA_TimesTime_ns_ForSta_TI = new double[nStations];
-    for (int i = 0; i < nStations; i++) {
+    // Nota: alloco nStations + 1 perché anche l'AP (NodeId = nStations)
+    // viene tracciato da PhyStateTrace_inPlace. Senza questa slot in più
+    // si verifica una scrittura out-of-bounds che corrompe gli array
+    // adiacenti in memoria (si manifestava come energia negativa per STA1).
+    timeElapsedForSta_ns_TI = new double[nStations + 1];
+    awakeTimeElapsedForSta_ns_TI = new double[nStations + 1];
+    current_mA_TimesTime_ns_ForSta_TI = new double[nStations + 1];
+    snap_energy_mA_ns_ForSta = new double[nStations + 1];
+
+    for (int i = 0; i < nStations + 1; i++) {
         timeElapsedForSta_ns_TI[i] = 0;
         awakeTimeElapsedForSta_ns_TI[i] = 0;
         current_mA_TimesTime_ns_ForSta_TI[i] = 0;
+        snap_energy_mA_ns_ForSta[i] = 0;
     }
+    // Energy model end
     // Energy model end
 
 
@@ -903,6 +1031,16 @@ static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_l
     Ptr<WifiNetDevice> apWifiDevice = apDevice.Get(0)->GetObject<WifiNetDevice> ();    //This returns the pointer to the object - works for all functions from WifiNetDevice
     Ptr<WifiMac> apMacTemp = apWifiDevice->GetMac ();
     Ptr<ApWifiMac> apMac = DynamicCast<ApWifiMac> (apMacTemp);
+    // Raccogli gli indirizzi MAC delle STA per la BeaconSyncCallback
+    std::vector<Mac48Address> staMacAddresses;
+    for(int ii = 1; ii <= nStations; ii++) {
+        Ptr<WifiNetDevice> device = staDevices[CLASS_IDX_VECTOR(ii)].Get(0)->GetObject<WifiNetDevice>();
+        Ptr<WifiMac> staMacTemp2 = device->GetMac();
+        Ptr<StaWifiMac> staMac2 = DynamicCast<StaWifiMac>(staMacTemp2);
+        staMacAddresses.push_back(staMac2->GetAddress());
+        std::cout << "[ns-3] STA" << ii << " MAC: " << staMac2->GetAddress() << std::endl;
+    }
+
     // Mac48Address apMacAddress = apMac->GetAddress();
     // std::cout<<"Ap MAC:"<<apMac<<"\n";
     if (enableTwt) {
@@ -1105,6 +1243,11 @@ static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_l
                   << beaconInterval.GetMicroSeconds()/1000.0 << "ms, fine @"
                   << sim_end_ms << "ms" << std::endl;
 
+        // Struct che tiene insieme le due durate. Allocata sullo stack del main,
+// vive fino alla fine della simulazione, quindi passare il suo indirizzo
+// alle callback schedulate è sicuro.
+static TwtDurationState twtState{&twtDuration, &twtDurationPending};
+
         for(double t = first_callback_ms; t < sim_end_ms;
             t += beaconInterval.GetMicroSeconds() / 1000.0) {
             Simulator::Schedule(
@@ -1112,8 +1255,10 @@ static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_l
                 &BeaconSyncCallback,
                 &reportMans,
                 nStations,
-                &twtDuration,
-                csv_outfile + "_beacon"   // percorso base dei file IPC
+                &twtState,                    // ← ora 6° argomento
+                csv_outfile + "_beacon",
+                apMac,
+                staMacAddresses
             );
         }
     }

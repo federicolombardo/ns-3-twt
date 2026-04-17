@@ -117,85 +117,6 @@ namespace ns3 {
       void set_last_wait_time_slots(int last_wait_slots) {m_last_wait_time_slots=static_cast<double>(last_wait_slots)*1.024;}
       void set_time_reference_shift(double milliseconds_shift) {m_reference_time_shift=milliseconds_shift;}
       void set_time_limit_rem_data(int sta_id, int rem_data_bytes) {m_time_limit_rem_data_STA_id=sta_id;m_time_limit_rem_data=rem_data_bytes;}
-      // ── Metriche per-beacon (Fase 2) ────────────────────────────────
-      // Chiama questa funzione all'inizio di ogni beacon per salvare
-      // uno snapshot dei contatori attuali. Dopo la chiamata, i metodi
-      // getBeacon*() restituiranno le metriche dell'ultimo beacon completato.
-      void snapshotBeaconStart() {
-      
-        // Al primo beacon (snap_rx_count==0 ma rx_count>0),
-        // inizializza lo snapshot con i valori attuali
-        // e usa tutti i pacchetti ricevuti fino ad ora come "beacon 0"
-        bool primo_beacon = (m_snap_rx_count == 0 && m_snap_tx_count == 0
-                             && m_rx_count > 0);
-
-        uint64_t delta_rx = m_rx_count - m_snap_rx_count;
-        uint64_t delta_tx = m_tx_count - m_snap_tx_count;
-        m_beacon_tx_count = delta_tx;
-
-        if(primo_beacon) {
-            // Il "beacon 0" contiene tutti i pacchetti arrivati prima
-            // del primo beacon callback — usali come metriche del primo beacon
-            m_beacon_avg_lat_ms   = m_metric_avg_latency_ms;
-            m_beacon_pktloss_perc = (m_tx_count > 0) ?
-                (double)(m_tx_count - m_rx_count) * 100.0 / (double)m_tx_count : 0.0;
-            m_beacon_rx_bytes = m_bytes_rx_count;
-            m_beacon_rx_count = m_rx_count;
-
-            // Aggiorna snapshot con i valori attuali
-            m_snap_rx_count       = m_rx_count;
-            m_snap_tx_count       = m_tx_count;
-            m_snap_bytes_rx       = m_bytes_rx_count;
-            m_snap_avg_latency_ms = m_metric_avg_latency_ms;
-            return;
-        }
-
-        // Latenza media del beacon: calcolata come differenza tra
-        // la somma cumulativa attuale e quella al momento dello snapshot
-        // La somma cumulativa = media * contatore
-        double current_lat_sum  = m_metric_avg_latency_ms * (double)m_rx_count;
-        double snapshot_lat_sum = m_snap_avg_latency_ms   * (double)m_snap_rx_count;
-
-        if(delta_rx > 0) {
-            m_beacon_avg_lat_ms = (current_lat_sum - snapshot_lat_sum) / (double)delta_rx;
-        } else {
-            m_beacon_avg_lat_ms = 0.0;
-        }
-
-        // Packet loss del beacon
-        // Packet loss del beacon
-        if(delta_tx > 0) {
-            if(delta_rx <= delta_tx) {
-                m_beacon_pktloss_perc = (double)(delta_tx - delta_rx) * 100.0 / (double)delta_tx;
-            } else {
-                // delta_rx > delta_tx: pacchetti trasmessi nel beacon precedente
-                // ricevuti in questo beacon — loss effettiva è 0
-                m_beacon_pktloss_perc = 0.0;
-            }
-        } else {
-            m_beacon_pktloss_perc = 0.0;
-        }
-
-        // Byte ricevuti nel beacon
-        m_beacon_rx_bytes = m_bytes_rx_count - m_snap_bytes_rx;
-
-        // Pacchetti ricevuti nel beacon
-        m_beacon_rx_count = delta_rx;
-
-        // Aggiorna lo snapshot con i valori attuali
-        m_snap_rx_count        = m_rx_count;
-        m_snap_tx_count        = m_tx_count;
-        m_snap_bytes_rx        = m_bytes_rx_count;
-        m_snap_avg_latency_ms  = m_metric_avg_latency_ms;
-      }
-
-      // Getters per le metriche dell'ultimo beacon
-      double   getBeaconAvgLatency(void)  const { return m_beacon_avg_lat_ms; }
-      double   getBeaconPktLoss(void)     const { return m_beacon_pktloss_perc; }
-      uint64_t getBeaconRxBytes(void)     const { return m_beacon_rx_bytes; }
-      uint64_t getBeaconRxCount(void)     const { return m_beacon_rx_count; }
-      uint64_t getBeaconTxCount(void)     const { return m_beacon_tx_count; }
-
     private:
       // Latency metrics
       unsigned long long int m_tx_count=0;
@@ -243,17 +164,6 @@ namespace ns3 {
 
       int m_time_limit_rem_data=0.0; // [B]
       int m_time_limit_rem_data_STA_id=0;
-      // ── Snapshot per calcolo metriche per-beacon (Fase 2) ───────────
-      uint64_t m_snap_rx_count       = 0;
-      uint64_t m_snap_tx_count       = 0;
-      uint64_t m_snap_bytes_rx       = 0;
-      double   m_snap_avg_latency_ms = 0.0;
-      // Metriche calcolate per l'ultimo beacon completato
-      double   m_beacon_avg_lat_ms   = 0.0;
-      double   m_beacon_pktloss_perc = 0.0;
-      uint64_t m_beacon_rx_bytes     = 0;
-      uint64_t m_beacon_rx_count     = 0;
-      uint64_t m_beacon_tx_count     = 0;
   };
 }
 
