@@ -1,0 +1,100 @@
+{
+  "run_id": "run_20260420_190713",
+  "config": {
+    "seed": 42,
+    "n_stations": 5,
+    "max_beacon": 361,
+    "actions_ms": [
+      2.0,
+      10.0,
+      50.0
+    ]
+  },
+  "beacons_processed": 360,
+  "anomalies": {
+    "ns3_timeouts": 0,
+    "ns3_errors": 0,
+    "ns3_warnings": 0,
+    "non_monotonic_sim_time": 0
+  },
+  "global": {
+    "avg_lat_ms": 45.01344,
+    "avg_loss_pct": 16.555555555555557,
+    "real_loss_pct": 0.0,
+    "avg_energy_mJ": 6.098280000000001,
+    "total_tx": 1326,
+    "total_rx": 1326
+  },
+  "action_distribution": {
+    "2.0": 623,
+    "10.0": 585,
+    "50.0": 592
+  },
+  "per_sta": [
+    {
+      "sta_id": 1,
+      "tx": 123,
+      "rx": 123,
+      "lat_ms_cum": 71.4689,
+      "lat_ms_beacon_avg": 18.705586111111113,
+      "loss_pct_beacon_avg": 33.05555555555556,
+      "energy_mJ_beacon_avg": 5.782856944444445,
+      "best_action_ms": null,
+      "best_action_value": null,
+      "t_valid_updates": null,
+      "ucb_arms": {}
+    },
+    {
+      "sta_id": 2,
+      "tx": 123,
+      "rx": 123,
+      "lat_ms_cum": 71.4689,
+      "lat_ms_beacon_avg": 18.705586111111113,
+      "loss_pct_beacon_avg": 33.05555555555556,
+      "energy_mJ_beacon_avg": 5.784194444444444,
+      "best_action_ms": null,
+      "best_action_value": null,
+      "t_valid_updates": null,
+      "ucb_arms": {}
+    },
+    {
+      "sta_id": 3,
+      "tx": 360,
+      "rx": 360,
+      "lat_ms_cum": 25.6446,
+      "lat_ms_beacon_avg": 5.535847222222222,
+      "loss_pct_beacon_avg": 8.333333333333334,
+      "energy_mJ_beacon_avg": 6.783079166666667,
+      "best_action_ms": null,
+      "best_action_value": null,
+      "t_valid_updates": null,
+      "ucb_arms": {}
+    },
+    {
+      "sta_id": 4,
+      "tx": 360,
+      "rx": 360,
+      "lat_ms_cum": 21.0259,
+      "lat_ms_beacon_avg": 2.974222222222222,
+      "loss_pct_beacon_avg": 3.888888888888889,
+      "energy_mJ_beacon_avg": 6.075433888888889,
+      "best_action_ms": null,
+      "best_action_value": null,
+      "t_valid_updates": null,
+      "ucb_arms": {}
+    },
+    {
+      "sta_id": 5,
+      "tx": 360,
+      "rx": 360,
+      "lat_ms_cum": 35.4589,
+      "lat_ms_beacon_avg": 3.22265,
+      "loss_pct_beacon_avg": 4.444444444444445,
+      "energy_mJ_beacon_avg": 6.065835555555556,
+      "best_action_ms": null,
+      "best_action_value": null,
+      "t_valid_updates": null,
+      "ucb_arms": {}
+    }
+  ]
+}

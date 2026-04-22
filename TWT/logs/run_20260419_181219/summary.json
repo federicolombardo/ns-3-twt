@@ -1,0 +1,86 @@
+{
+  "run_id": "run_20260419_181219",
+  "config": {
+    "seed": 42,
+    "n_stations": 2,
+    "max_beacon": 360,
+    "actions_ms": [
+      2.0,
+      5.0,
+      10.0
+    ]
+  },
+  "beacons_processed": 360,
+  "anomalies": {
+    "ns3_timeouts": 0,
+    "ns3_errors": 0,
+    "ns3_warnings": 0,
+    "non_monotonic_sim_time": 0
+  },
+  "global": {
+    "avg_lat_ms": 48.7037,
+    "avg_loss_pct": 33.05555555555556,
+    "avg_energy_mJ": 9.158060138888889,
+    "total_tx": 246,
+    "total_rx": 246
+  },
+  "action_distribution": {
+    "2.0": 242,
+    "5.0": 228,
+    "10.0": 250
+  },
+  "per_sta": [
+    {
+      "sta_id": 1,
+      "tx": 123,
+      "rx": 123,
+      "lat_ms_cum": 48.7012,
+      "lat_ms_beacon_avg": 16.63958611111111,
+      "loss_pct_beacon_avg": 33.05555555555556,
+      "energy_mJ_beacon_avg": 9.15842,
+      "best_action_ms": 10.0,
+      "best_action_value": 0.4856,
+      "t_valid_updates": 213,
+      "ucb_arms": {
+        "2.0": {
+          "count": 70,
+          "value": 0.4774
+        },
+        "5.0": {
+          "count": 68,
+          "value": 0.469
+        },
+        "10.0": {
+          "count": 75,
+          "value": 0.4856
+        }
+      }
+    },
+    {
+      "sta_id": 2,
+      "tx": 123,
+      "rx": 123,
+      "lat_ms_cum": 48.7062,
+      "lat_ms_beacon_avg": 16.641283333333334,
+      "loss_pct_beacon_avg": 33.05555555555556,
+      "energy_mJ_beacon_avg": 9.157700277777778,
+      "best_action_ms": 10.0,
+      "best_action_value": 0.4857,
+      "t_valid_updates": 213,
+      "ucb_arms": {
+        "2.0": {
+          "count": 70,
+          "value": 0.4774
+        },
+        "5.0": {
+          "count": 68,
+          "value": 0.469
+        },
+        "10.0": {
+          "count": 75,
+          "value": 0.4857
+        }
+      }
+    }
+  ]
+}

@@ -1,305 +1,163 @@
-"""
-mab.py — Multi-Armed Bandit per ottimizzazione TWT dinamico
-============================================================
-Algoritmo: epsilon-greedy con epsilon decrescente nel tempo.
+import numpy as np
 
-Struttura cartelle prodotta:
-    Risultati/
-    └── MAB_2026-xx-xx_xx-xx-xx/
-        ├── mab_log.json
-        ├── grafico_mab.png
-        ├── Run_..._epoch01_arm2_explore/
-        │   ├── risultato_raw.csv
-        │   ├── metriche.json          <- dati completi per validazione
-        │   ├── configurazioni.txt
-        │   ├── terminal_log.txt
-        │   └── grafico_overview.png   <- solo ogni GENERA_GRAFICI_OGNI epoch
-        ├── Run_..._epoch02_arm0_exploit/
-        └── ...
+AZIONI = [2.0, 5.0, 10.0]  # ms, spazio delle azioni
 
-Reward = w_energy * (1 - idle_energy_norm) + w_latency * (1 - latency_norm)
-"""
+# parametri fissi da mettere in cima al file insieme agli altri
+ENERGY_MIN_J = 0.005   # ~5mJ, minimo osservato nei log
+ENERGY_MAX_J = 0.013   # ~13mJ, massimo osservato nei log
+LAT_MAX_MS   = 200   # latenza di riferimento per normalizzazione
+W_ENERGY     = 0.6    # peso energia
+W_LAT        = 0.4    # peso latenza
+W_LOSS       = 0.4    # peso loss
 
-import os
-import json
-import datetime
-import random
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+MIN_HOLD = 3  # campioni minimi per braccio prima di cambiare azione (per stabilizzare reward)
 
-from run_esperimento import run
+class UCBAgent:
+    """Un agente UCB1 per una singola STA."""
 
+    def __init__(self, sta_id: int, seed: int = 42):
+        self.sta_id   = sta_id
+        self.n_arms   = len(AZIONI)
+        self.counts   = np.zeros(self.n_arms)   # quante volte ho scelto ogni braccio
+        self.valori   = np.zeros(self.n_arms)   # reward media per braccio
+        self.t        = 0                        # numero totale di round validi
+        self.rng      = np.random.default_rng(seed + sta_id)
+        self.current_arm_idx  = None
+        self.current_arm_hold = 0  # quante volte ho aggiornato il braccio corrente
 
-# ==========================================
-# CONFIGURAZIONE MAB
-# ==========================================
+        # normalizzazione dinamica energia
+        self.energy_max = None
 
-PARAMS_FISSI = {
-    "nStations":         5,
-    "t0":                0.1,
-    "t1":                0.1,
-    "packetPeriodicity": [0.5, 1.0, 2.0, 2.0, 5.0],
-    "mcs":               4,
-    "frequency":         5,
-    "simulationTime":    10240,
-    "enableTWT":         "true",
-    "twtTriggerBased":   "true",
-    "STAtype":           3,
-}
+    # ------------------------------------------------------------------
+    """"
+    def scegli(self) -> float:
+        Restituisce la durata TWT scelta (in ms).
+        # Fase di inizializzazione: esplora ogni braccio almeno una volta
+        bracci_non_esplorati = np.where(self.counts == 0)[0]
+        if len(bracci_non_esplorati) > 0:
+            idx = bracci_non_esplorati[0]
+        else:
+            # UCB1
+            ucb = self.valori + np.sqrt(2 * np.log(self.t) / self.counts)
+            idx = int(np.argmax(ucb))
 
-ARMS = {
-    0: [10, 10, 10, 10, 10],   # naive uguale (Run C)
-    1: [8,   6,  4,  4,  2],   # calibrato manuale (Run D)
-    2: [5,   5,  5,  5,  5],   # omogeneo piccolo (Run B)
-    3: [12,  8,  5,  3,  1],   # molto differenziato
-    4: [6,   6,  6,  6,  6],   # omogeneo medio
-}
+        return AZIONI[idx]"""
+    def scegli(self) -> float:
+        bracci_non_esplorati = np.where(self.counts == 0)[0]
+        if len(bracci_non_esplorati) > 0:
+            # esplorazione iniziale: esplora ogni braccio almeno una volta
+            idx = int(bracci_non_esplorati[0])
+        elif self.current_arm_hold is not None and self.current_arm_hold < MIN_HOLD:
+            # rimani sul braccio corrente finché non hai abbastanza campioni
+            idx = self.current_arm_idx
+        else:
+            # UCB1
+            ucb = self.valori + np.sqrt(2 * np.log(self.t) / self.counts)
+            idx = int(np.argmax(ucb))
 
-N_ARMS           = len(ARMS)
-N_EPOCH          = 15
-EPSILON_INIZIALE = 0.8
-EPSILON_FINALE   = 0.1
-W_ENERGY         = 0.6
-W_LATENCY        = 0.4
-GENERA_GRAFICI_OGNI = 5
+        if idx != self.current_arm_idx:
+            self.current_arm_idx  = idx
+            self.current_arm_hold = 0
+        return AZIONI[idx]
 
+    # ------------------------------------------------------------------
+    def aggiorna(self, azione_ms: float, stato: dict):
+        """
+        Aggiorna il braccio corrispondente ad azione_ms con la reward
+        calcolata dallo stato del beacon corrente.
 
-# ==========================================
-# FUNZIONE REWARD
-# ==========================================
+        stato: dict con chiavi avg_lat_ms, pktloss_perc, beacon_energy_J,
+               twt_duration_ms (durata attiva sull'aria)
+        """
+        # Beacon di transizione: la durata attiva non corrisponde all'azione
+        # scelta — reward non affidabile, saltiamo l'aggiornamento
+        if abs(stato["twt_duration_ms"] - azione_ms) > 0.01:
+            return
 
-def calcola_reward(metriche, storia_metriche):
-    """
-    Reward normalizzata online su idle_energy_perc e avg_lat_ms.
-    Legge i valori dagli alias diretti del dict metriche.
-    """
-    tutte = storia_metriche + [metriche]
+        # Beacon vuoto: nessun pacchetto trasmesso in questo intervallo.
+        # lat=0 e loss=0 sono artefatti, non metriche reali — nessuna informazione utile.
+        if stato.get("tx_count", 0) == 0:
+            return
 
-    max_idle_e = max(m["idle_energy_perc"] for m in tutte) or 1.0
-    max_lat    = max(m["avg_lat_ms"]       for m in tutte) or 1.0
+        # Trova l'indice del braccio
+        distanze = [abs(a - azione_ms) for a in AZIONI]
+        idx = int(np.argmin(distanze))
 
-    idle_norm = metriche["idle_energy_perc"] / max_idle_e
-    lat_norm  = metriche["avg_lat_ms"]       / max_lat
+        # Calcola reward
+        reward = self._calcola_reward(stato)
 
-    return round(W_ENERGY * (1.0 - idle_norm) + W_LATENCY * (1.0 - lat_norm), 4)
+        # Aggiornamento media incrementale
+        self.current_arm_hold += 1
+        self.counts[idx] += 1
+        self.t            += 1
+        self.valori[idx]  += (reward - self.valori[idx]) / self.counts[idx]
 
+    # ------------------------------------------------------------------
+    """def _calcola_reward(self, stato: dict) -> float:
+        Reward in [0, 1] — più alta è meglio.
 
-# ==========================================
-# EPSILON DECRESCENTE
-# ==========================================
+        # --- energia ---
+        energy_j = stato["beacon_energy_J"]
+        if self.energy_max is None or energy_j > self.energy_max:
+            self.energy_max = energy_j
+        if self.energy_max > 0:
+            r_energy = 1.0 - energy_j / self.energy_max
+        else:
+            r_energy = 0.0
 
-def epsilon_at(epoch, n_epoch):
-    frac = epoch / max(n_epoch - 1, 1)
-    return EPSILON_INIZIALE + frac * (EPSILON_FINALE - EPSILON_INIZIALE)
+        # --- latenza ---
+        lat = stato["avg_lat_ms"]
+        r_lat = 1.0 - min(lat / LAT_MAX_MS, 1.0)
 
+        # --- loss ---
+        loss = stato["pktloss_perc"] / 100.0   # da % a [0,1]
+        r_loss = 1.0 - loss
 
-# ==========================================
-# SCELTA ARM
-# ==========================================
+        return W_ENERGY * r_energy + W_LAT * r_lat + W_LOSS * r_loss
+        
+    def _calcola_reward(self, stato: dict) -> float:
+        # --- energia ---
+        energy_j = stato["beacon_energy_J"]
+        r_energy = 1.0 - (energy_j - ENERGY_MIN_J) / (ENERGY_MAX_J - ENERGY_MIN_J)
+        r_energy = float(np.clip(r_energy, 0.0, 1.0))
 
-def scegli_arm(stime_reward, epsilon):
-    if random.random() < epsilon:
-        return random.randint(0, N_ARMS - 1), "explore"
-    return max(stime_reward, key=stime_reward.get), "exploit"
+        # --- latenza ---
+        lat = stato["avg_lat_ms"]
+        r_lat = 1.0 - min(lat / LAT_MAX_MS, 1.0)  # normalizzazione con saturazione a 1.0
 
+        # --- loss ---
+        loss = stato["pktloss_perc"] / 100.0
+        r_loss = 1.0 - loss
 
-# ==========================================
-# AGGIORNAMENTO STIMA
-# ==========================================
+        return W_ENERGY * r_energy + W_LAT * r_lat + W_LOSS * r_loss
 
-def aggiorna_stima(stime_reward, conteggi, arm_id, reward):
-    conteggi[arm_id]     += 1
-    n                     = conteggi[arm_id]
-    stime_reward[arm_id] += (reward - stime_reward[arm_id]) / n
+    # ------------------------------------------------------------------"""
+    def _calcola_reward(self, stato: dict) -> float:
+        loss = stato["pktloss_perc"] / 100.0
+        delivery_rate = 1.0 - loss  # 0.0 = tutto perso, 1.0 = tutto consegnato
 
+        # energia
+        energy_j = stato["beacon_energy_J"]
+        r_energy = 1.0 - (energy_j - ENERGY_MIN_J) / (ENERGY_MAX_J - ENERGY_MIN_J)
+        r_energy = float(np.clip(r_energy, 0.0, 1.0))
 
-# ==========================================
-# GRAFICO FINALE DEL MAB
-# ==========================================
+        # latenza (lat=0 quando delta_rx=0 è già escluso dal controllo tx_count in aggiorna)
+        lat = stato["avg_lat_ms"]
+        r_lat = 1.0 - min(lat / LAT_MAX_MS, 1.0)
 
-def genera_grafico_mab(storia, cartella_mab):
-    epoch_ids   = [s["epoch"]  for s in storia]
-    rewards     = [s["reward"] for s in storia]
-    arms_scelti = [s["arm_id"] for s in storia]
-    tipi        = [s["tipo"]   for s in storia]
-
-    arm_colors = ['#5DCAA5', '#378ADD', '#EF9F27', '#D85A30', '#AFA9EC']
-
-    fig, axes = plt.subplots(3, 1, figsize=(12, 14))
-    fig.suptitle('MAB — Risultati del loop di ottimizzazione TWT',
-                 fontsize=13, fontweight='bold')
-
-    # Pannello 1: Reward per epoch
-    ax = axes[0]
-    colori_barra = ['#378ADD' if t == 'exploit' else '#EF9F27' for t in tipi]
-    ax.bar(epoch_ids, rewards, color=colori_barra, edgecolor='white', width=0.7)
-    ax.set_xlabel('Epoch')
-    ax.set_ylabel('Reward')
-    ax.set_title('Reward per epoch')
-    ax.set_xticks(epoch_ids)
-    ax.set_ylim(0, 1.15)
-    if rewards:
-        ax.axhline(y=max(rewards), color='#5DCAA5', linestyle='--', linewidth=1, alpha=0.7)
-        ax.text(epoch_ids[-1], max(rewards) + 0.02,
-                f'max={max(rewards):.3f}', ha='right', fontsize=8, color='#5DCAA5')
-    for e, r in zip(epoch_ids, rewards):
-        ax.text(e, r + 0.02, f'{r:.2f}', ha='center', fontsize=7)
-    ax.legend(handles=[
-        mpatches.Patch(color='#378ADD', label='Exploit (sfrutta)'),
-        mpatches.Patch(color='#EF9F27', label='Explore (esplora)'),
-    ], fontsize=9)
-    ax.grid(axis='y', alpha=0.3)
-
-    # Pannello 2: Arm scelto per epoch
-    ax = axes[1]
-    bar_colors_arm = [arm_colors[a % len(arm_colors)] for a in arms_scelti]
-    ax.bar(epoch_ids, [1] * len(epoch_ids), color=bar_colors_arm, edgecolor='white', width=0.7)
-    ax.set_xlabel('Epoch')
-    ax.set_title('Arm scelto per epoch')
-    ax.set_xticks(epoch_ids)
-    ax.set_yticks([])
-    for e, a in zip(epoch_ids, arms_scelti):
-        ax.text(e, 0.5, f'A{a}', ha='center', va='center',
-                fontsize=9, fontweight='bold', color='white')
-    ax.legend(
-        handles=[mpatches.Patch(color=arm_colors[k % len(arm_colors)],
-                                label=f'Arm {k}: {ARMS[k]}') for k in ARMS],
-        fontsize=7, loc='upper right', bbox_to_anchor=(1.0, 1.4), ncol=3
-    )
-
-    # Pannello 3: Stima finale reward per arm
-    ax = axes[2]
-    stima_finale = storia[-1]["stime_reward"]
-    arm_ids_list = sorted(stima_finale.keys())
-    valori       = [stima_finale[a] for a in arm_ids_list]
-    colors_f     = [arm_colors[a % len(arm_colors)] for a in arm_ids_list]
-    bars = ax.bar(range(len(arm_ids_list)), valori, color=colors_f, edgecolor='white', width=0.5)
-    for bar, val in zip(bars, valori):
-        ax.text(bar.get_x() + bar.get_width() / 2, val + 0.015,
-                f'{val:.3f}', ha='center', fontsize=9)
-    ax.set_xlabel('Arm')
-    ax.set_ylabel('Stima reward')
-    ax.set_title("Stima finale della reward per arm (piu' alto = migliore)")
-    ax.set_xticks(range(len(arm_ids_list)))
-    ax.set_xticklabels([f'Arm {k}\n{ARMS[k]}' for k in arm_ids_list], fontsize=7)
-    ax.set_ylim(0, 1.15)
-    ax.grid(axis='y', alpha=0.3)
-
-    plt.tight_layout()
-    path_grafico = os.path.join(cartella_mab, "grafico_mab.png")
-    plt.savefig(path_grafico, bbox_inches='tight', dpi=150)
-    plt.close(fig)
-    print(f"📊 Grafico MAB salvato: {path_grafico}")
-
-
-# ==========================================
-# LOOP PRINCIPALE MAB
-# ==========================================
-
-def main():
-    timestamp_mab = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    cartella_mab  = os.path.join("Risultati", f"MAB_{timestamp_mab}")
-    os.makedirs(cartella_mab, exist_ok=True)
-
-    stime_reward    = {k: 0.0 for k in ARMS}
-    conteggi        = {k: 0   for k in ARMS}
-    storia          = []
-    storia_metriche = []
-
-    print("\n" + "=" * 60)
-    print(f"  MAB AVVIATO — {N_EPOCH} epoch | {N_ARMS} arm")
-    print(f"  Reward: energia {W_ENERGY*100:.0f}% | latenza {W_LATENCY*100:.0f}%")
-    print(f"  Epsilon: {EPSILON_INIZIALE} -> {EPSILON_FINALE} (lineare)")
-    print(f"  Output: {cartella_mab}/")
-    print("=" * 60 + "\n")
-
-    for epoch in range(N_EPOCH):
-        epsilon      = epsilon_at(epoch, N_EPOCH)
-        arm_id, tipo = scegli_arm(stime_reward, epsilon)
-        twt_scelto   = ARMS[arm_id]
-
-        print(f"\n{'='*55}")
-        print(f"  EPOCH {epoch+1}/{N_EPOCH}  |  epsilon={epsilon:.2f}  |  {tipo.upper()}")
-        print(f"  Arm scelto: {arm_id} -> twtDuration={twt_scelto}")
-        print(f"{'='*55}")
-
-        params_epoch   = {**PARAMS_FISSI, "twtDuration": twt_scelto}
-        genera_grafici = ((epoch + 1) % GENERA_GRAFICI_OGNI == 0) or (epoch == N_EPOCH - 1)
-        label          = f"epoch{epoch+1:02d}_arm{arm_id}_{tipo}"
-
-        metriche = run(
-            params_epoch,
-            genera_grafici=genera_grafici,
-            epoch_label=label,
-            cartella_padre=cartella_mab,
-        )
-
-        if metriche is None:
-            print(f"⚠️  Epoch {epoch+1} fallita — salto e continuo")
-            continue
-
-        reward = calcola_reward(metriche, storia_metriche)
-        storia_metriche.append(metriche)
-        aggiorna_stima(stime_reward, conteggi, arm_id, reward)
-
-        record = {
-            "epoch":        epoch + 1,
-            "arm_id":       arm_id,
-            "tipo":         tipo,
-            "epsilon":      round(epsilon, 3),
-            "twtDuration":  twt_scelto,
-            "reward":       reward,
-            "stime_reward": dict(stime_reward),
-            "conteggi":     dict(conteggi),
-            # metriche aggregate compatte per il log (il JSON completo sta nella cartella epoch)
-            "metriche_aggregate": metriche["aggregate"],
-        }
-        storia.append(record)
-
-        print(f"\n  -> Reward:        {reward:.4f}")
-        print(f"  -> Idle energia:  {metriche['idle_energy_perc']:.1f}%")
-        print(f"  -> Latenza MAC:   {metriche['avg_lat_ms']:.2f} ms")
-        print(f"  -> PktLoss:       {metriche['pktloss_perc']:.2f}%")
-        print(f"  -> Stime arm:    { {k: round(v, 3) for k, v in stime_reward.items()} }")
-        print(f"  -> Conteggi arm:  {conteggi}")
-
-    if not storia:
-        print("Nessuna epoch completata correttamente.")
-        return None, {}
-
-    arm_migliore = max(stime_reward, key=stime_reward.get)
-
-    print("\n" + "=" * 60)
-    print("  LOOP MAB COMPLETATO")
-    print(f"  Arm migliore:  {arm_migliore} -> twtDuration={ARMS[arm_migliore]}")
-    print(f"  Stima reward:  {stime_reward[arm_migliore]:.4f}")
-    print(f"  Volte scelto:  {conteggi[arm_migliore]}/{N_EPOCH}")
-    print(f"  Output:        {cartella_mab}/")
-    print("=" * 60 + "\n")
-
-    # Log JSON MAB (storia compatta — i dati completi stanno nei metriche.json per-epoch)
-    log_path = os.path.join(cartella_mab, "mab_log.json")
-    with open(log_path, "w") as f:
-        json.dump({
-            "timestamp":      timestamp_mab,
-            "n_epoch":        N_EPOCH,
-            "n_arms":         N_ARMS,
-            "arms":           ARMS,
-            "w_energy":       W_ENERGY,
-            "w_latency":      W_LATENCY,
-            "epsilon_init":   EPSILON_INIZIALE,
-            "epsilon_final":  EPSILON_FINALE,
-            "arm_migliore":   arm_migliore,
-            "stime_finali":   stime_reward,
-            "conteggi":       conteggi,
-            "storia":         storia,
-        }, f, indent=2)
-    print(f"📄 Log MAB salvato: {log_path}")
-
-    genera_grafico_mab(storia, cartella_mab)
-
-    return arm_migliore, stime_reward
-
-
-if __name__ == "__main__":
-    main()
+        # delivery_rate come moltiplicatore globale:
+        # energia e latenza contano solo nella misura in cui i pacchetti arrivano.
+        # loss=100% → reward=0 sempre; loss=0% → reward piena.
+       
+        return delivery_rate * (W_ENERGY * r_energy + W_LAT * r_lat)
+        #return 1.0 - min(lat / LAT_MAX_MS, 1.0)
+    
+    def stato_str(self) -> str:
+        """Stringa di debug leggibile."""
+        righe = [f"STA{self.sta_id} | t={self.t}"]
+        for i, a in enumerate(AZIONI):
+            righe.append(
+                f"  azione={a}ms  count={int(self.counts[i])}  "
+                f"val={self.valori[i]:.4f}"
+            )
+        return "\n".join(righe)

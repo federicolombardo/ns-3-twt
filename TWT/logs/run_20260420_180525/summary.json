@@ -1,0 +1,164 @@
+{
+  "run_id": "run_20260420_180525",
+  "config": {
+    "seed": 42,
+    "n_stations": 5,
+    "max_beacon": 360,
+    "actions_ms": [
+      2.0,
+      10.0,
+      50.0
+    ]
+  },
+  "beacons_processed": 360,
+  "anomalies": {
+    "ns3_timeouts": 0,
+    "ns3_errors": 0,
+    "ns3_warnings": 0,
+    "non_monotonic_sim_time": 0
+  },
+  "global": {
+    "avg_lat_ms": 110.13288,
+    "avg_loss_pct": 23.77776666666667,
+    "avg_energy_mJ": 6.629180833333334,
+    "total_tx": 3690,
+    "total_rx": 3668
+  },
+  "action_distribution": {
+    "2.0": 548,
+    "10.0": 622,
+    "50.0": 630
+  },
+  "per_sta": [
+    {
+      "sta_id": 1,
+      "tx": 738,
+      "rx": 734,
+      "lat_ms_cum": 76.9621,
+      "lat_ms_beacon_avg": 51.42364444444444,
+      "loss_pct_beacon_avg": 22.962944444444442,
+      "energy_mJ_beacon_avg": 6.554884444444445,
+      "best_action_ms": 50.0,
+      "best_action_value": 0.5697,
+      "t_valid_updates": 215,
+      "ucb_arms": {
+        "2.0": {
+          "count": 66,
+          "value": 0.5365
+        },
+        "10.0": {
+          "count": 71,
+          "value": 0.5471
+        },
+        "50.0": {
+          "count": 78,
+          "value": 0.5697
+        }
+      }
+    },
+    {
+      "sta_id": 2,
+      "tx": 738,
+      "rx": 736,
+      "lat_ms_cum": 73.7195,
+      "lat_ms_beacon_avg": 51.18964444444445,
+      "loss_pct_beacon_avg": 21.75925,
+      "energy_mJ_beacon_avg": 6.6042652777777775,
+      "best_action_ms": 50.0,
+      "best_action_value": 0.4847,
+      "t_valid_updates": 217,
+      "ucb_arms": {
+        "2.0": {
+          "count": 71,
+          "value": 0.469
+        },
+        "10.0": {
+          "count": 71,
+          "value": 0.4755
+        },
+        "50.0": {
+          "count": 75,
+          "value": 0.4847
+        }
+      }
+    },
+    {
+      "sta_id": 3,
+      "tx": 738,
+      "rx": 732,
+      "lat_ms_cum": 75.1003,
+      "lat_ms_beacon_avg": 51.197358333333334,
+      "loss_pct_beacon_avg": 22.314805555555555,
+      "energy_mJ_beacon_avg": 6.8039805555555555,
+      "best_action_ms": 50.0,
+      "best_action_value": 0.4806,
+      "t_valid_updates": 216,
+      "ucb_arms": {
+        "2.0": {
+          "count": 65,
+          "value": 0.4359
+        },
+        "10.0": {
+          "count": 69,
+          "value": 0.45
+        },
+        "50.0": {
+          "count": 82,
+          "value": 0.4806
+        }
+      }
+    },
+    {
+      "sta_id": 4,
+      "tx": 738,
+      "rx": 732,
+      "lat_ms_cum": 85.5105,
+      "lat_ms_beacon_avg": 52.987824999999994,
+      "loss_pct_beacon_avg": 23.148138888888887,
+      "energy_mJ_beacon_avg": 6.58453,
+      "best_action_ms": 10.0,
+      "best_action_value": 0.4727,
+      "t_valid_updates": 215,
+      "ucb_arms": {
+        "2.0": {
+          "count": 67,
+          "value": 0.4433
+        },
+        "10.0": {
+          "count": 78,
+          "value": 0.4727
+        },
+        "50.0": {
+          "count": 70,
+          "value": 0.4549
+        }
+      }
+    },
+    {
+      "sta_id": 5,
+      "tx": 738,
+      "rx": 734,
+      "lat_ms_cum": 239.372,
+      "lat_ms_beacon_avg": 55.62600833333334,
+      "loss_pct_beacon_avg": 28.703694444444444,
+      "energy_mJ_beacon_avg": 6.598243888888889,
+      "best_action_ms": 10.0,
+      "best_action_value": 0.4909,
+      "t_valid_updates": 223,
+      "ucb_arms": {
+        "2.0": {
+          "count": 59,
+          "value": 0.4097
+        },
+        "10.0": {
+          "count": 85,
+          "value": 0.4909
+        },
+        "50.0": {
+          "count": 79,
+          "value": 0.4685
+        }
+      }
+    }
+  ]
+}

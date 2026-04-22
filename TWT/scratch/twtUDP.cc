@@ -535,7 +535,7 @@ void BeaconSyncCallback(std::vector<ReportManager>* reportMans,
                     initiateTwtAtAp(apMac, mac, twtWakeInterval, newDuration, time_t1);
                     active_ptr->setValue(idx, new_dur);
                 });
-}
+    }
 
     } else {
         std::cout << "[ns-3][ERRORE] Numero durate errato (" << new_durations.size()
@@ -543,10 +543,13 @@ void BeaconSyncCallback(std::vector<ReportManager>* reportMans,
     }
 
     // ── 5. Scrivi ACK per Python ─────────────────────────────────────
-    std::ofstream ack_out(ack_file);
-    ack_out << "{\"ack\": true, \"sim_time_ms\": " << now_ms << "}\n";
-    ack_out.close();
-
+    std::string ack_tmp = ack_file + ".tmp";
+    {
+        std::ofstream ack_out(ack_tmp);
+        ack_out << "{\"ack\": true, \"sim_time_ms\": " << now_ms << "}\n";
+        ack_out.close();
+    }
+    std::rename(ack_tmp.c_str(), ack_file.c_str());
     // ── 6. Aspetta che Python legga l'ACK e scriva done ─────────────
     // Python deve cancellare l'ACK e scrivere done per segnalare
     // che ha finito. Solo allora ns-3 può procedere al beacon successivo.
@@ -1236,7 +1239,7 @@ static void run_single_simulation(sim_params_t parameters,int *direct_ns3_mode_l
     {
         double first_callback_ms = CLIENT_TRAFFIC_START_SECOND * 1000.0
                                    + beaconInterval.GetMicroSeconds() / 1000.0;
-        double sim_end_ms        = simulationTime;
+        double sim_end_ms        = simulationTime +1;
 
         std::cout << "[ns-3] Schedulazione BeaconSyncCallback: primo beacon @"
                   << first_callback_ms << "ms, ogni "
